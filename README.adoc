@@ -1,3 +1,7 @@
 == Metar backend
 
 Description coming soon...
+
+=== Dependencies
+
+* Metar library: https://pkg.go.dev/gitlab.com/lcmatrix/metar

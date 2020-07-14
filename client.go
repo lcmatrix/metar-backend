@@ -6,14 +6,15 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
+
+	"gitlab.com/lcmatrix/metar"
 )
 
 // URL to weather API
 const URL = "https://api.met.no/weatherapi/tafmetar/1.0/metar.txt"
 
 // FetchMetar calls weather service API and returns an array of metar informations.
-func FetchMetar(params RequestParams) []Metar {
+func FetchMetar(params RequestParams) []metar.Metar {
 	var urlBuilder strings.Builder
 	urlBuilder.WriteString(URL)
 	urlBuilder.WriteString("?icao=")
@@ -36,6 +37,6 @@ func FetchMetar(params RequestParams) []Metar {
 // RequestParams is a struct of possible parameters
 type RequestParams struct {
 	icao           []string
-	date           time.Time
+	date           string
 	timezoneOffset string
 }
