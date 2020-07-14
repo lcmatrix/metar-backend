@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,6 +18,10 @@ func FetchMetar(params RequestParams) []metar.Metar {
 	urlBuilder.WriteString(URL)
 	urlBuilder.WriteString("?icao=")
 	urlBuilder.WriteString(strings.Join(params.icao, ","))
+	if len(params.date) != 0 {
+		urlBuilder.WriteString("&date=")
+		urlBuilder.WriteString(params.date)
+	}
 	res, err := http.Get(urlBuilder.String())
 	if err != nil {
 		log.Println(err)
@@ -29,9 +32,30 @@ func FetchMetar(params RequestParams) []metar.Metar {
 	if err != nil {
 		log.Printf("Error reading response: %v\n", err)
 	}
-	fmt.Printf("%s\n", b)
-	var metar []Metar
-	return metar
+
+	metars := convertResponseToMetar(b)
+	if len(params.date) == 0 {
+		return metars[len(metars)-1:]
+	}
+
+	return metars
+}
+
+func convertResponseToMetar(b []byte) []metar.Metar {
+	var metarReturn []metar.Metar
+	var builder strings.Builder
+	builder.Write(b)
+	s := builder.String()
+	arr := strings.Split(s, "\n")
+	for i := 0; i < len(arr); i++ {
+		m, err := metar.ParseMetar(arr[i])
+		if err == nil {
+			metarReturn = append(metarReturn, *m)
+		} else {
+			log.Printf("Error in converting metar: %v", err)
+		}
+	}
+	return metarReturn
 }
 
 // RequestParams is a struct of possible parameters
